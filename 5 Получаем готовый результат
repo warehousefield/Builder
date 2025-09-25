@@ -1,0 +1,29 @@
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using Autodesk.Revit.Attributes;
+
+[Transaction(TransactionMode.Manual)]
+public class PerimeterBuilderCommand : IExternalCommand
+{
+    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+    {
+        Document doc = commandData.Application.ActiveUIDocument.Document;
+
+        // Создаем конкретного строителя
+        var builder = new StandardPerimeterBuilder();
+
+        // Создаем директора и передаем ему строителя
+        var director = new PerimeterDirector(builder);
+
+        // Директор управляет процессом создания отчета
+        director.ConstructPerimeterReport(doc);
+        
+        // Получаем готовый результат у строителя
+        BuildingPerimeterReport report = builder.GetResult();
+        
+        // Выводим результат в окно сообщений Revit
+        TaskDialog.Show("Perimeter Report", report.ToString());
+
+        return Result.Succeeded;
+    }
+}
