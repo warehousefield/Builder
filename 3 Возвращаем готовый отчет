@@ -1,0 +1,49 @@
+using Autodesk.Revit.DB;
+using System.Collections.Generic;
+using System.Linq;
+
+public class StandardPerimeterBuilder : IPerimeterBuilder
+{
+    private BuildingPerimeterReport _report;
+    private Document _doc;
+
+    public StandardPerimeterBuilder()
+    {
+        this.Reset();
+    }
+
+    public void Reset()
+    {
+        this._report = new BuildingPerimeterReport();
+    }
+
+    public void FindBuildingWalls(Document doc)
+    {
+        _doc = doc;
+        
+        // Используем FilteredElementCollector для поиска всех стен.
+        var walls = new FilteredElementCollector(_doc)
+            .OfCategory(BuiltInCategory.OST_Walls)
+            .WhereElementIsNotElementType()
+            .Cast<Wall>()
+            .ToList();
+            
+        // Заполняем списки в отчете
+        _report.WallNames = walls.Select(w => w.Name).ToList();
+        _report.WallLengths = walls.Select(w => w.GetCurveElement().GeometryCurve.Length).ToList();
+    }
+
+    public void CalculatePerimeter()
+    {
+        // Суммируем длины всех стен для получения общего периметра
+        _report.TotalPerimeter = _report.WallLengths.Sum();
+    }
+
+    public BuildingPerimeterReport GetResult()
+    {
+        // Возвращаем готовый отчет и сбрасываем строителя для нового использования
+        var result = this._report;
+        this.Reset();
+        return result;
+    }
+}
