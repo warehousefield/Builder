@@ -1,0 +1,18 @@
+using Autodesk.Revit.DB;
+
+public class PerimeterDirector
+{
+    private IPerimeterBuilder _builder;
+
+    public PerimeterDirector(IPerimeterBuilder builder)
+    {
+        _builder = builder;
+    }
+
+    public void ConstructPerimeterReport(Document doc)
+    {
+        _builder.Reset();
+        _builder.FindBuildingWalls(doc);
+        _builder.CalculatePerimeter();
+    }
+}
